@@ -52,6 +52,8 @@ And that would be **27 lines of code!!** just to load the assets But with Clove 
 
 And *that's it*!!! __27 lines of code versus 1 line of clove__. Which is better? You decide
 
+> *But what if I have a "spritesheet" of keyboard images?* Then clove may not help you. But you could use [iffy](https://github.com/YoungNeer/iffy) for that task
+
 ### Load an arbitrary asset
 
 Clove can even load an arbitrary asset- meaning you can load an individual asset without having to know what type of asset it is. An example might do good here:-
