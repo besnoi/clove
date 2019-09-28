@@ -7,7 +7,7 @@
 local clove={}
 local delim=package.config:sub(1,1) --path delimiter: '/' or '\'
 
-local imgExt={"png","jpg","gif","jpeg","bmp"}
+local imgExt={"png","jpg","gif","jpeg","tga","bmp"}
 local fontExt={"ttf","otf"}
 local audioExt={"mp3","wav","midi","ogg"}
 local vidExt={"vid"} --since ogg is reserved for audio
