@@ -1,12 +1,11 @@
 clove=require 'clove'
 
-gAssets=clove.importAll("assets",true)
-
-gAssets['ready']:play()
+clove.importAll("assets",true,_G) --> _G is returned!
+ready:play()
 
 function love.draw()
-	love.graphics.draw(gAssets['mountain range'])
+	love.graphics.draw(mountain_range)
 
-	love.graphics.setFont(gAssets['Kenney Mini'])
+	love.graphics.setFont(Kenney_Mini)
 	love.graphics.print("Hello World")
 end

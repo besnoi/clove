@@ -4,7 +4,7 @@
 	(https://github.com/YoungNeer/clove)
 ]]
 
-local clove={debug=false}
+local clove={}
 local delim=package.config:sub(1,1) --path delimiter: '/' or '\'
 
 local imgExt={"png","jpg","gif","jpeg","tga","bmp"}
@@ -15,20 +15,15 @@ local vidExt={"vid"} --since ogg is reserved for audio
 local allExt={"png","jpg","ttf","ogg","mp3","wav","otf","midi","jpeg","bmp","gif","vid"}
 
 local function isAFile(url)
-	return love.filesystem.getInfo(url) and love.filesystem.getInfo(url).type=="file"
+	return love.filesystem.getInfo(url).type=="file"
 end
 
 local function lastIndexOf(str,char)
 	for i=str:len(),1,-1 do if str:sub(i,i)==char then return i end end
-	return str:len()+1
 end
 
 local function removeExtension(filename)
 	return filename:sub(1,lastIndexOf(filename,".")-1)
-end
-
-local function getWord(filename)
-	return string.match(filename:gsub(' ','_'),"[_%w]+")
 end
 
 local function getExtension(filename)
@@ -95,96 +90,62 @@ function clove.loadAsset(url,...)
 	end
 end
 
---[[clove.requireLib:- (The Master Function for requiring modules)
+--[[clove.requireLib:- (The Master Function for requiring Library)
 	
 	    Description: Loads all the libraries in the path (except those defined by `except`) 
-					 and if it is returning-library then adds it to a hashtable (which it returns) 
+					 and (depending on `simple`) either adds it to a hashtable (which it returns)
 					 with the filenames as the key (custom key could be used with the help of `rename`)
 					 or simply requires the library thus avoiding allocation of any extra memory
 
 	    Parameters:
 	      path         - the directory to look up for modules (with .lua extension) (string)
-		  recurse      - whether to keep looking for modules in the sub-directories (bool)
-		  tbl          - The table to merge the modules with
+	      recurse      - whether to keep looking for modules in the sub-directories (bool)
 	      rename       - a function which takes in a filename and returns the key string
 	      except       - a function which takes in a filename and returns a boolean
 						 for whether the asset should be added or not
+		  simple       - if the library is a simple one which doesn't return something.
+						 In case it does then it will create and return a table of libraries
+						 Otherwise no memory is created and nothing is returned
 
 	    Please note that only the path argument is mandatory- and please check
 	    if filenames are not same when recursively adding files.
-	    See ReadMe.md for more info on the possible problems with recurse
+	    See ReadMe.md for more info on the possible problems with recurse (when simple is false)
 ]]
 
-function clove.requireLib(path,recurse,tbl,rename,except,isPackage,debugTab)
+function clove.requireLib(path,recurse,rename,except,simple)
 
 	assert(love.filesystem.getInfo(path),"Clove Error! Directory '"..path.."' doesn't exist!")
 
-	local libTbl=tbl or {}
+	local libTbl={}
 
-	local dir,libName=love.filesystem.getDirectoryItems(path)
+	local dir=love.filesystem.getDirectoryItems(path)
 
-	rename=rename or (tbl and getWord or removeExtension)
+	rename=rename or removeExtension
 	except=except or function() return false end
-	debugTab=debugTab or ''
-	if debugTab=='' and clove.debug then
-		print("----------DEBUG INFORMATION----------")
-	end
 
 	for _,file in ipairs(dir) do
 		if isAFile(path..delim..file) then
-			libName=rename(file)
-			if getExtension(file)=="lua" and file~="init.lua" and not except(file) then
-				file=removeExtension(file)
-				if type(require(path..delim..file))~='boolean' then
-					libTbl[libName]=require(path..delim..file)
-					if clove.debug then
-						print(debugTab.."Loaded module "..libName..' ('..path..delim..file..') ...')
-					end
+			if getExtension(file)=="lua" and not except(file) then
+				if simple then
+					require(path..delim..removeExtension(file))
 				else
-					require(path..delim..file)
-					if clove.debug then
-						print(debugTab..'[NOTE: '..path..delim..file..' is a non-returning library]')
-					end
+					libTbl[rename(file)]=require(path..delim..removeExtension(file))
 				end
 			end
 		else
-			if isPackage then
-				if isAFile(path..delim..file..delim..'init.lua') and not except(file) then
-					if type(require(path..delim..file))~='boolean' then
-						libTbl[rename(file)]=require(path..delim..file)
-						if clove.debug then
-							print(debugTab.."Loaded package "..path..delim..file..'...')
-						end
-					else
-						require(path..delim..file)
-						if clove.debug then print(debugTab..'[NOTE: '..path..delim..file..' is a non-returning package]') end
-					end
-				end
-			else
-				if recurse then
-					if isAFile(path..delim..file..delim..'init.lua') then
-						if clove.debug then print(debugTab.."[NOTE: '"..path..delim..file.."' is ignored (as it's a package)]") end
-					else
-						if clove.debug then print(debugTab..'[+] Recursing.. '..path..delim..file) end
-							mergeTables(
-								libTbl,
-								clove.requireLib(path..delim..file,recurse,tbl,rename,except,isPackage,debugTab..'\t')
-							)
-					end
-				end
+			if recurse then
+				mergeTables(
+					libTbl,
+					clove.requireLib(path..delim..file,recurse,rename,except,simple)
+				)
 			end
 		end
 	end
 	return libTbl
 end
 
-function clove.requirePackage(path,tbl,except)
-	clove.requireLib(path,false,tbl,nil,except,true)	
-end
-
-function clove.require(path,recurse,tbl,except)
-	clove.requireLib(path,recurse,tbl,nil,except,false)
-	clove.requireLib(path,false,tbl,nil,except,true)
+function clove.require(path,recurse,except)
+	clove.requireLib(path,recurse,nil,except,true)
 end
 
 
@@ -199,8 +160,7 @@ end
 	      assetType    - a table which consists of the filetype of the asset to load
 	    				 (eg. {'png','jpg'} for images and {'mp3'} for audio you could possibly
 	    				 even mix assets like {'ttf','ogg'})
-		  path         - the directory to look up for images (string)
-		  tbl          - The table to merge with ({} by default)
+	      path         - the directory to look up for images (string)
 	      recurse      - whether to keep looking for images in the sub-directories (bool)
 	      rename       - a function which takes in a filename and returns the key string
 	      except       - a function which takes in a filename and returns a boolean
@@ -211,36 +171,28 @@ end
 	    if filenames are not same when recursively adding files.
 	    See ReadMe.md for more info on the possible problems with recurse
 ]]
-function clove.load(assetType,path,recurse,tbl,rename,except,...)
+function clove.load(assetType,path,recurse,rename,except,...)
 
 	assert(love.filesystem.getInfo(path),"Clove Error! Directory '"..path.."' doesn't exist!")
 
-	tbl=tbl
 	recurse=recurse or false
-	rename=rename or (tbl and getWord or removeExtension)
+	rename=rename or removeExtension
 	except=except or function() return false end
-	local libName
 	
-	local dir,assetTbl=love.filesystem.getDirectoryItems(path),tbl or {}
+	local dir,assetTbl=love.filesystem.getDirectoryItems(path),{}
 
 	for i=1,#dir do
 		if isAFile(path..delim..dir[i]) then
-			libName=rename(dir[i])
+
 			if not except(dir[i]) and existsInList(assetType,getExtension(dir[i])) then
-				if libName and not assetTbl[libName] then
-					assetTbl[libName]=clove.loadAsset(path..delim..dir[i],...)
-				else
-					if clove.debug then
-						print('[WARNING! Key '..name..' already exists for '..dir[i]..']')
-					end
-				end
+				assetTbl[rename(dir[i])]=clove.loadAsset(path..delim..dir[i],...)
 			end
 			
 		else
 			if recurse then
 				mergeTables(
 					assetTbl,
-					clove.load(assetType,path..delim..dir[i],recurse,tbl,rename,except,...)
+					clove.load(assetType,path..delim..dir[i],recurse,rename,except,...)
 				)
 			end
 		end
