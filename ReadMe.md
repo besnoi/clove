@@ -9,7 +9,7 @@ And please note here asset means "images,fonts,sounds and videos"
 - [How to use Clove for asset loading?](#how-to-use-clove)
 	- [A quick walkthrough](#a-quick-walkthrough)
 	- [Load an arbitrary asset using Clove](#load-an-arbitrary-asset)	    
-	- [Load all types of asset at once](#load-all-types-of-asset-at-once)
+	- [Load up all the assets at once](#load-up-all-the-assets-at-once)
 	- [Load specific type of assets](#load-specific-type-of-assets)
 	- [The Master Function for importing Assets](#the-master-function-for-importing-assets)
 - [How to use Clove for requiring libraries?](#how-to-use-clove-for-requiring-libraries)
@@ -19,6 +19,7 @@ And please note here asset means "images,fonts,sounds and videos"
 - [Debugging](#Debugging)
 - [Auto-Correction Ability](#auto-correction-ability)
 - [Aliases used in Clove](#aliases-used-in-clove)
+- [Caveats](#caveats)
 
 ## How to use Clove?
 
@@ -64,7 +65,7 @@ Ans. There's no way for clove to know if the image is an atlas. Well presence of
 
 **Q. What if I don't want a table but rather global assets which i can access individually?**
 
-Ans. Hmm...let me see can you do that in Clove..? Well- turns out - *you could*!! Head over to [Load all types of asset at once](#load-all-types-of-asset-at-once).
+Ans. Hmm...let me see can you do that in Clove..? Well- turns out - *you could*!! Head over to [Load up all the assets at once](#Load up all the assets at once).
 
 ### Load an arbitrary asset
 
@@ -137,7 +138,7 @@ We first required clove which is trivial and then we used the importAll function
 Now let's look at the function prototype of `clove.importAll`:- (ignore what's under <>)
 
 ```html
-<table> clove.importAll(<string> path, <boolean> recurse, <table> tbl, <function> rename, <function> except, ... )
+<table> clove.importAll(<string> path, <boolean> recurse, <table> tbl, <function> rename, <function> except, <function> param )
 ```
 
 Let's break down what each parameter means:-
@@ -149,12 +150,12 @@ Let's break down what each parameter means:-
 	tbl        | all assets will go in this table
 	rename     | a function which takes in a filename and returns the key string
 	except     | a function which takes in a filename and returns a boolean for               whether the asset should be added or not
-	....       | varargs for more control
+	param      | a function which returns the parameters to pass in when loading              a particular asset (useful when loading fonts of specific size)
 
 
 Now many other functions like `clove.importImages`,`clove.importFonts`,etc are going to follow the same modus operandi so let's take a close hard-look at the parameters.
 
-`path` and `recurse` are trivial. The varargs are something we have already looked at (at [this](#load-an-arbitrary-asset) section). So the odd-ones are perhaps `tbl` and `rename` and `except`
+`path` and `recurse` are trivial. The param section simply returns the parameters when an asset is loaded (see [this](#load-an-arbitrary-asset) section FMI). So the odd-ones are perhaps `tbl` and `rename` and `except`
 
 `tbl` is nothing but the table you want to add the assets to! If you pass in `_G` then that's going to create *global assets*, it is `{}` by default!
 
@@ -337,3 +338,7 @@ Well I wanted to make it a detailed section but since I dont' have much time as 
 	clove.loadAudio=clove.loadSounds
 	clove.loadSprites=clove.loadImages
 ```
+
+## Caveats
+
+You can't load image font in Clove!! Infact I don't even recommend using clove to load fonts unless size doesn't matter to you. Cause then you'd have to use the `param` function. If all fonts are going to have the same size then `param` function can simply return that size and in other cases things are going to be bit messy with all those branches and stuff going on... Also in case of fonts you might have to change the `rename` function since the fonts name would be something like `orbiton.ttf` and you'd want `scoreFont.ttf`,etc and ofcourse many fonts would map to the same file!

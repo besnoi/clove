@@ -205,13 +205,13 @@ end
 	      rename       - a function which takes in a filename and returns the key string
 	      except       - a function which takes in a filename and returns a boolean
 						 for whether the asset should be added or not
-		  ....         - varargs for more control (eg. loading fonts with size 18,etc)
+		  param        - An function to pass in parameters for asset-loading (eg. loading fonts with size 18,etc)
 
 	    Please note that only the type & path argument is mandatory- and please check
 	    if filenames are not same when recursively adding files.
 	    See ReadMe.md for more info on the possible problems with recurse
 ]]
-function clove.load(assetType,path,recurse,tbl,rename,except,...)
+function clove.load(assetType,path,recurse,tbl,rename,except,param)
 
 	assert(love.filesystem.getInfo(path),"Clove Error! Directory '"..path.."' doesn't exist!")
 
@@ -219,6 +219,7 @@ function clove.load(assetType,path,recurse,tbl,rename,except,...)
 	recurse=recurse or false
 	rename=rename or (tbl and getWord or removeExtension)
 	except=except or function() return false end
+	param=param or function() end
 	local libName
 	
 	local dir,assetTbl=love.filesystem.getDirectoryItems(path),tbl or {}
@@ -228,7 +229,7 @@ function clove.load(assetType,path,recurse,tbl,rename,except,...)
 			libName=rename(dir[i])
 			if not except(dir[i]) and existsInList(assetType,getExtension(dir[i])) then
 				if libName and not assetTbl[libName] then
-					assetTbl[libName]=clove.loadAsset(path..delim..dir[i],...)
+					assetTbl[libName]=clove.loadAsset(path..delim..dir[i],param(dir[i]))
 				else
 					if clove.debug then
 						print('[WARNING! Key '..name..' already exists for '..dir[i]..']')
@@ -240,7 +241,7 @@ function clove.load(assetType,path,recurse,tbl,rename,except,...)
 			if recurse then
 				mergeTables(
 					assetTbl,
-					clove.load(assetType,path..delim..dir[i],recurse,tbl,rename,except,...)
+					clove.load(assetType,path..delim..dir[i],recurse,tbl,rename,except,param)
 				)
 			end
 		end
