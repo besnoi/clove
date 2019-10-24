@@ -16,6 +16,7 @@ And please note here asset means "images,fonts,sounds and videos"
 	- [Requiring Packages](#Requiring-packages)
 	- [Requiring Modules](#Requiring-modules)
 	- [Requiring both modules and packages](#Requiring-both-modules-and-packages)
+	- [Easiest way to load both libraries and modules](#easiest-way-to-load-both-libraries-and-modules)
 - [Debugging](#Debugging)
 - [Auto-Correction Ability](#auto-correction-ability)
 - [Aliases used in Clove](#aliases-used-in-clove)
@@ -267,7 +268,7 @@ Let's see an example:-
 You could require both libraries and packages at one go using `require`  :-
 
 ```html
-	<table> clove.require(<string> path, <boolean> recurse, <table> tbl, <function> except)
+	<table> clove.require(<string> path, [<boolean> recurse, [<table> tbl, [<function> except]]])
 ```
 
 So much like [`clove.requirePackage`](#Requiring-Packages) except that now you have an extra `recurse` parameter. This is for modules (like `class.lua` is inside `hump`) but packages will be unaffected by that (since packages have their own folder and *very* rarely would you find a package within a package unless it's used internally for that particular package)
@@ -277,12 +278,23 @@ We'll see an example of this function in the next section
 Before we end this section this is the actual prototype for `clove.requireLib`:-
 
 ```html
-<table> clove.requireLib(<string> p, <boolean> p, <table> t, <function> r, e, <boolean> isPackage, <string> dT)
+<table> clove.requireLib(<string> p, <boolean> r, <table> t, <function> r, e, <boolean> isPackage, <string> dT)
 ```
 
-> Some parameter names are reduced to their initials so that you don't see that ugly scrollbar!
+> Some parameter names are reduced to their initials so that you don't see that ugly scrollbar! Also the square-brackets signifying optional parameters have been removed for the same reason
 
 So from where came this `isPackage` and `dT`?. `isPackage` when true loads only packages non-recursively and when false loads only modules recursively/non-recursively depending on `recurse`. So `clove.requirePackage` is just a subset of `clove.requireLib` and `clove.require` simply calls `clove.requireLib` two times with alternating `isPackage`. So in that sense `clove.requireLib` is the master function for loading libraries just like [`clove.load`](#the-master-function-for-importing-assets) is the master function for loading assets! Oh! and about `dT` well - it stands for *debugTab*. It is meant to be used internally. So don't worry about it!
+
+## Easiest way to load both libraries and modules
+
+Most of the timer you'd be requiring libraries globally and most of the time you won't recurse! So why do you have to say `clove.require(path,false,_G)` which makes your code kinda cryptic to someone new. So, as an alternative there's *another* function which you could use for requiring both libraries and modules - `requireAll`
+
+```html
+	<nil> clove.requireAll(<string> path, <boolean> [recurse])
+```
+
+So the function doesn't return anything - it doesn't do anything cryptic. It simply loads libraries and modules from a path *globally* by their filename and you can optionally check whether or not you want to *recursively* load the libraries!
+
 
 ## Debugging
 
@@ -291,7 +303,8 @@ What if a library couldn't by loaded because it was inside a package or because 
 ```lua
 clove=require 'clove'
 clove.debug=true
-clove.require("lib",true,_G)
+clove.requireAll("lib",true)
+--same as clove.require("lib",true,_G)
 print(hello_world)
 print(lavis,flux,class,timer,chain)
 ```

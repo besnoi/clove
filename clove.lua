@@ -179,14 +179,18 @@ function clove.requireLib(path,recurse,tbl,rename,except,isPackage,debugTab)
 end
 
 function clove.requirePackage(path,tbl,except)
-	clove.requireLib(path,false,tbl,nil,except,true)	
+	return clove.requireLib(path,false,tbl,nil,except,true)	
 end
 
 function clove.require(path,recurse,tbl,except)
-	clove.requireLib(path,recurse,tbl,nil,except,false)
-	clove.requireLib(path,false,tbl,nil,except,true)
+	local tbl1=clove.requireLib(path,recurse,tbl,nil,except,false)
+	local tbl2=clove.requireLib(path,false,tbl,nil,except,true)
+	return mergeTables(tbl1,tbl2)
 end
 
+function clove.requireAll(path,recurse)
+	clove.require(path,recurse,_G)
+end
 
 --[[
 	clove.load:- (The Master Function for importing assets)
