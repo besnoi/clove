@@ -2,7 +2,7 @@
 
 Clove is a useful LÖVE library using which you can easily (super-easily) loads huge amount of assets.
 It also makes the process of requiring libraries super-easy. So two birds with one shot- libraries and assets!
-And please note here asset means "images,fonts,sounds and videos"
+And please note here asset means "images, fonts,s ounds and videos" (Files are scheduled for now! Please read [contribution](#Contribution) for that)
 
 ## Table Of Contents
 
