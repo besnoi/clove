@@ -21,6 +21,7 @@ And please note here asset means "images,fonts,sounds and videos"
 - [Auto-Correction Ability](#auto-correction-ability)
 - [Aliases used in Clove](#aliases-used-in-clove)
 - [Caveats](#caveats)
+- [Contribution](#Contribution)
 
 ## How to use Clove?
 
@@ -66,7 +67,7 @@ Ans. There's no way for clove to know if the image is an atlas. Well presence of
 
 **Q. What if I don't want a table but rather global assets which i can access individually?**
 
-Ans. Hmm...let me see can you do that in Clove..? Well- turns out - *you could*!! Head over to [Load up all the assets at once](#Load up all the assets at once).
+Ans. Hmm...let me see can you do that in Clove..? Well- turns out - *you could*!! Head over to [Load up all the assets at once](#Load-up-all-the-assets-at-once).
 
 ### Load an arbitrary asset
 
@@ -355,3 +356,7 @@ Well I wanted to make it a detailed section but since I dont' have much time as 
 ## Caveats
 
 You can't load image font in Clove!! Infact I don't even recommend using clove to load fonts unless size doesn't matter to you. Cause then you'd have to use the `param` function. If all fonts are going to have the same size then `param` function can simply return that size and in other cases things are going to be bit messy with all those branches and stuff going on... Also in case of fonts you might have to change the `rename` function since the fonts name would be something like `orbiton.ttf` and you'd want `scoreFont.ttf`,etc and ofcourse many fonts would map to the same file!
+
+## Contribution
+
+The above mentioned problem could be solved with Love2D's File! So it'd be useful if Clove could also load files at one go just like it loads other stuff! I am currently very busy with my studies and other work so I'd *really* appreciate if some-one out there helped me in this! You could call the function `clove.loadFiles` or whatever you like! Just make sure it follows the same argument-list as other functions! Needless to say your name would appear in the Author lists (along with this ReadMe). I appreciate your contribution even if it's a minor typo or prettifying the source-code!
