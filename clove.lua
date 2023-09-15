@@ -236,7 +236,7 @@ function clove.load(assetType,path,recurse,tbl,rename,except,param)
 					assetTbl[libName]=clove.loadAsset(path..delim..dir[i],param(dir[i]))
 				else
 					if clove.debug then
-						print('[WARNING! Key '..name..' already exists for '..dir[i]..']')
+						print('[WARNING! Key '..libName..' already exists for '..dir[i]..']')
 					end
 				end
 			end
